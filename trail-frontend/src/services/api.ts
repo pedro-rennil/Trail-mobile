@@ -88,7 +88,7 @@ export async function getProjectById(
   return request<Project>(`/api/projects/${projectId}`, {
     method: 'GET',
     headers: {
-      Authorization: 'Bearer ' + token,
+      Authorization: ['Bearer', token].join(' '),
     },
   });
 }
