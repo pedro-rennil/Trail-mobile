@@ -9,25 +9,23 @@ import { useStore } from '../../store/useStore';
  * sign-in page when there is no user in the (persisted) store. Auth state lives
  * in localStorage today, so the guard runs on the client rather than middleware.
  *
- * The redirect decision is deferred until after the first client mount: the
- * server (and the first client paint) render nothing, then we re-evaluate once
- * the persisted store has rehydrated. This avoids an SSR→client mismatch and the
- * race where a slow hydration would briefly see `user === null` and bounce an
+ * The redirect is gated on the persisted store having finished rehydrating:
+ * otherwise a slow rehydration could briefly read `user === null` and bounce an
  * already-authenticated user to /signin.
  */
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
   const user = useStore((s) => s.user);
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
+  const [hydrated, setHydrated] = useState(() => useStore.persist.hasHydrated());
+
+  // Subscribe to rehydration completion (setState lives in the callback, not the
+  // effect body) and unsubscribe on unmount.
+  useEffect(() => useStore.persist.onFinishHydration(() => setHydrated(true)), []);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (hydrated && !user) router.replace('/signin');
+  }, [hydrated, user, router]);
 
-  useEffect(() => {
-    if (mounted && !user) router.replace('/signin');
-  }, [mounted, user, router]);
-
-  if (!mounted || !user) return null;
+  if (!hydrated || !user) return null;
   return <>{children}</>;
 }
