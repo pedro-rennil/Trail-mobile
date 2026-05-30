@@ -17,6 +17,10 @@ interface AppState {
   // active lesson (aula/[id] page)
   currentLesson: Lesson | null;
   setCurrentLesson: (lesson: Lesson | null) => void;
+  // favorited trail ids
+  favorites: string[];
+  toggleFavorite: (trailId: string) => void;
+  isFavorite: (trailId: string) => boolean;
   // AI personalization for the logged-in user
   aiRecomendacao: TrilhaPersonalizada | null;
   setAiRecomendacao: (rec: TrilhaPersonalizada | null) => void;
@@ -27,7 +31,7 @@ interface AppState {
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       setUser: (user) => set({ user }),
 
@@ -55,6 +59,15 @@ export const useStore = create<AppState>()(
       currentLesson: null,
       setCurrentLesson: (currentLesson) => set({ currentLesson }),
 
+      favorites: [],
+      toggleFavorite: (trailId) =>
+        set((state) => ({
+          favorites: state.favorites.includes(trailId)
+            ? state.favorites.filter((id) => id !== trailId)
+            : [...state.favorites, trailId],
+        })),
+      isFavorite: (trailId) => get().favorites.includes(trailId),
+
       aiRecomendacao: null,
       setAiRecomendacao: (aiRecomendacao) => set({ aiRecomendacao }),
 
@@ -63,8 +76,8 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'trail-auth',
-      // Only user survives page refresh. Everything else is re-fetched from mocks.
-      partialize: (state) => ({ user: state.user }),
+      // Only user + favorites survive a refresh. Everything else is re-fetched from mocks.
+      partialize: (state) => ({ user: state.user, favorites: state.favorites }),
     }
   )
 );
