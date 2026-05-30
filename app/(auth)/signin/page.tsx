@@ -113,18 +113,19 @@ export default function SignInPage() {
             autoComplete="current-password"
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 0.75 }}>
-            <Typography
-              component="span"
-              variant="caption"
+            <Box
+              component={Link}
+              href="/recuperar-senha"
               sx={{
                 color: 'primary.main',
-                cursor: 'default',
+                textDecoration: 'none',
                 fontFamily: 'var(--f-sans)',
                 fontSize: '0.75rem',
+                '&:hover': { textDecoration: 'underline' },
               }}
             >
               Esqueci minha senha
-            </Typography>
+            </Box>
           </Box>
         </Box>
 
