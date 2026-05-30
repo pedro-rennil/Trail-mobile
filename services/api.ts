@@ -60,4 +60,9 @@ export const api = {
   async register(name: string, email: string, _password: string): Promise<User> {
     return delay({ ...MOCK_USER, name, email, avatarInitials: initials(name) }, 800);
   },
+
+  async requestPasswordReset(_email: string): Promise<{ ok: true }> {
+    // Always resolves in the prototype — a real backend would email a reset link.
+    return delay({ ok: true }, 600);
+  },
 };
